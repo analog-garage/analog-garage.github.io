@@ -7,7 +7,7 @@ technology. We pioneer breakthrough technologies that contribute to a more conne
 
 ## The ICASSP 2025 Person-in-Bed Signal Processing Grand Challenge
 The Analog Garage is sponsoring a Signal Processing Grand Challenge at [ICASSP 2025](https://2025.ieeeicassp.org/) around Person-in-Bed Detection.
-[Details are here](icassp-2025/home.md)
+[Details are here](icassp-2025/README.md)
 
 ## Questions About This Website
 Please contact:
