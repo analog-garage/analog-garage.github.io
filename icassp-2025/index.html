@@ -105,10 +105,17 @@
                             <li><b>Task 1:</b> Classification of pre-chunked accelerometer signals into the following categories: {"not in bed", "in bed"}</li>
                             <li><b>Task 2:</b>Streaming version of a person-detection classifier which minimizes latency and maximizes accuracy.</li>
                         </ul>
-
-
                     </p>
+
+                    <p>
+                    Intellectual property (IP) of the shared/submitted code is not transferred to the challenge organizers. Participants remain the owners of their code. If code is made publicly available by participants, an appropriate license should be added.
+                    </p>
+                
+
 					</div>
+
+               
+
 				</section>
 
 				<!--Dataset-->
@@ -136,7 +143,9 @@
 					<h3>Tracks and Evaluation</h3>
 					<h4>Track 1: Segmented Detection</h4>
 					<p> 
-                        For the first challenge, we invite participants to build a person-in-bed classifier that operates on pre-chunked accelerometer samples. The dataset contains entries in the following format:
+                        For the first challenge, we invite participants to build a person-in-bed classifier that operates on pre-chunked accelerometer samples. 
+                        <h5>Data Overview</h5>
+                        The dataset for track 1 contains entries in the following format:
                         $$
                             \begin{equation}
                                 \begin{split}
@@ -162,6 +171,8 @@
                         We provide the timestamps associated with \(\texttt{accel}\) in the \(\texttt{ts}\) list. This is also length 2500, one timestamp per accelerometer sample. The timestamps are UTC timestamps in seconds. Finally, the attribute \(\texttt{label}\) is a single integer value, 0 for "not in bed" and 1 for "in bed".
                     </p>
                     <p>
+                        
+                        <h5>Evaluation</h5>
                         The objective of this task is to maximize the balanced accuracy of the classifer. This can be computed as below: 
                         $$
                             Acc_{balanced} = \frac{1}{2}(TPR + TNR)
@@ -178,7 +189,88 @@
                       
                     </p>
 					<h4>Track 2: Streaming Detection</h4>
-					<p> The real one </p>
+					<p>
+                        In this second challenge, we invite participants to design a more practical implementation of their person-detection algorithm: a streaming-based version. The dataset for this challenge contains entire subject waveforms, approximately 15 minutes of data per subject. Participants are tasked with predicting in-bed status, causally, at each timestamp. Algorithms can make predictions utilizing windows longer than the 10 second window provided in track 1 in effort to improve accuracy, however doing so will impact latency. Shorter windows can also be considered to improve latency, however doing so may impact accuracy. Latency will be most notable when transitioning from "in bed" to "not in bed" portions and visa versa. This track is designed to evaluate the real user experience of a person detection algorithm: How accurate is the model generally? How long does the detector take to transition between class predictions when someone gets into or out of bed? Submissions should strive to maximize accuracy, while minimizing latency. 
+                    </p>
+                    
+                    <h5> Data Overview</h5>
+                    The dataset for track 2 contains entries in the following format:
+                        $$
+                            \begin{equation}
+                                \begin{split}
+                                    \{\hspace{1 cm}&\\
+                                      \hspace{1 cm}&\texttt{`subject'} : \texttt{int}, \\
+                                      \hspace{1 cm}&\texttt{`accel'} : [[a_{0,x}, a_{0,y}, a_{0,z}], [a_{1,x}, a_{1,y}, a_{1,z}], \dots], \\   
+                                      \hspace{1 cm}&\texttt{`ts'} : [t_0, t_1, \dots], \\  
+                                      \hspace{1 cm}&\texttt{`labels'} : [l_0, l_1, \dots] \\
+                                    \}\hspace{1 cm}&
+                                \end{split}
+                            \end{equation}
+                        $$
+                    The \(\texttt{subject}\) attribute is an integer ID corresponding to the subject data was collected on (same as in track 1). 
+                    The \( \texttt{accel} \) attribute contains the accelerometer samples for the entire waveform. This is generally 15 minutes of data, sometimes more or less. This can be shaped into an \( (n_{samples}, 3)\) matrix. The sample rate is the same as in track 1, 250 Hz. 
+                    </p>
+                    <p>
+                    \( \texttt{ts} \) and \( \texttt{labels} \) are each \(  n_{samples} \) in length, containing UTC timestamps in seconds and class labels, respectively. There is now a class label at every timestamp, compared to track 1 where there was only one label for the waveform.
+                    </p>
+                    
+
+                    
+                    <h5> Rules </h5>
+                    Participants must abide by the following rules for solutions to be considered:
+                        <ol type="1">
+                            <li> Systems must be casual. Output at time \( t_i \) must only use samples at times \( t \leq t_i \)</li>
+                        </ol>
+
+                    <h5>Evaluation</h5>
+                        
+                    We have come up with an evaluation metric for this track which incorporates metrics for the following objectives: minimizing latency and maximizing accuracy. Slight emphasis is placed on the former since Track 1 handles accuracy alone. A depiction of the scoring methodology is below and explained in the subsequent paragraphs.
+                    <img src="../img/track2-scoring.png" alt="" style="max-width: 100%;"/>
+
+                    First, we will explain how we compute the score \(s_j\) for an individual subject, subject \( j\).  Each waveform has a total number of transitions, denoted \( n_{switch} \), which is the number of times the subject transitions from "in bed" to "not in bed" or visa versa. For example, if a subject is in bed the entire data collection, \(n_{switch} = 0\). If the subject starts in bed, then gets out of bed and remains out of bed for the rest of the collection, \(n_{switch}=1 \). In the image below, \( n_{switch} = 2 \). The final score for a subject will be a combination of \( n_{switch} + 1 \) scores: \( s_{acc} \) which represents the accuracy score (computed outside of the latency windows only), and each \( s_{switch,i} \), which represent the score at the \(i^{th}\) transition between classes, for \(i\) in \(1, \dots, n_{switch}\):
+                        $$
+                            s_j = \frac{s_{acc} + \sum_{i=1}^{n_{switch}}s_{switch,i}}{n_{switch}+1}
+                        $$
+                        
+                        The accuracy \( s_{acc} \) is computed outside of the latency windows and represents general accuracy of the method. The is computed as:
+                        $$
+                            s_{acc} = \frac{TP + TN}{TP + FP + TN + FN}
+                        $$
+                    
+                                               
+
+                        Each transition score \( s_{switch,i} \) is computed as a combination of the prediction latency and accuracy in the window:
+                        $$
+                            s_{switch,i} = \textbf{1}[s_{acc,i} > .7]\frac{s_{acc,i} + s_{latency,i}}{2}
+                        $$
+
+                         The latency score at transition \( i \) is evaluated as below. 
+                        $$
+                            s_{latency,i} = \max(0, \frac{n_{win,i} - (\hat{t}_{switch,i} - t_{switch,i})}{n_{win,i}})
+                        $$
+                        In the equation above \( n_{win,i} \) is set to correspond to a 60 second window unless the number of remaining samples after \( t_{switch,i} \) is less than that. 
+
+                        The accuracy score within the transition is computed as below for all predictions that fall in the transition window.
+                        $$
+                            s_{acc,i} = \frac{TP + TN}{TP + FP + TN + FN}
+                        $$
+            
+                        Note that as shown above, transition scores \( s_{switch, i} \) are set to 0 if the accuracy in that window is less than \( .7 \). This is because if the accuracy is below such a value, it is reasonable to assume the transition was not detected at all.
+
+                        
+                        <p>
+                        The above formula is used for the predictions for each subject. It will generate a score between 0 and 1 per subject. The final score for track 2 will be the average score across all subjects:
+                        $$
+                            s = \frac{1}{n_{subjects}}\sum_{j=1}^{n_{subjects}}s_j
+                        $$ 
+                        </p>
+                      
+
+    
+        
+         
+    
+                    
 					</div>
 				</section>
 
@@ -203,7 +295,9 @@
 				<section id="timeline"></section>
 					<div class="container">
 					<h3>Timeline</h3>
-					<!--Image of the timeline goes here-->
+                        <ul>
+                            <il> </il>
+                        </ul>
 					</div>
 				</section>	
 
