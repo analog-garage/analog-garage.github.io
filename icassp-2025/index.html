@@ -116,7 +116,48 @@
 					<div class="container">
 					<h3>Tracks and Evaluation</h3>
 					<h4>Track 1: Segmented Detection</h4>
-					<p> The less useful problem </p>
+					<p> 
+                        For the first challenge, we invite participants to build a person-in-bed classifier that operates on pre-chunked accelerometer samples. The dataset contains entries in the following format:
+                        $$
+                            \begin{equation}
+                                \begin{split}
+                                    \{\hspace{1 cm}&\\
+                                      \hspace{1 cm}&\texttt{`subject'} : \texttt{int}, \\
+                                      \hspace{1 cm}&\texttt{`chunk_id'} : \texttt{int}, \\
+                                      \hspace{1 cm}&\texttt{`accel'} : [[a_{0,x}, a_{0,y}, a_{0,z}], [a_{1,x}, a_{1,y}, a_{1,z}], \dots], \\   
+                                      \hspace{1 cm}&\texttt{`ts'} : [t_0, t_1, \dots], \\  
+                                      \hspace{1 cm}&\texttt{`label'} : \texttt{int} \\
+                                    \}\hspace{1 cm}&
+                                \end{split}
+                            \end{equation}
+                        $$
+                        \(\texttt{subject}\) is an integer ID corresponding to the subject data was collected on. \(\texttt{chunk_id}\) is unique ID for this chunk across all chunks in the dataset. Note that there is no particular meaning to the value \(\texttt{chunk_id}\) beyond being a unique identifier (i.e. order has no meaning).
+                        </p>
+                        <p>
+                        Each \(\texttt{accel}\) sample can be converted to a \( (2500,3) \) matrix, resulting from the following collection attributes:
+                        <ul>
+                            <li>Sample rate 250 Hz</li>
+                            <li>Sample length 10 seconds, giving 2500 samples at the above sample rate</li>
+                            <li>Each sample is a raw 3-axis accelerometer value</li>
+                        </ul>
+                        We provide the timestamps associated with \(\texttt{accel}\) in the \(\texttt{ts}\) list. This is also length 2500, one timestamp per accelerometer sample. The timestamps are UTC timestamps in seconds. Finally, the attribute \(\texttt{label}\) is a single integer value, 0 for "not in bed" and 1 for "in bed".
+                    </p>
+                    <p>
+                        The objective of this task is to maximize the balanced accuracy of the classifer. This can be computed as below: 
+                        $$
+                            Acc_{balanced} = \frac{1}{2}(TPR + TNR)
+                        $$
+                        where \( TPR \) is the true positive rate, computed as:
+                        $$
+                            TPR = \frac{TP}{TP + FN}
+                        $$
+                        and \( TNR \) is the true negative rate, computed as:
+                        $$
+                            TNR = \frac{TN}{TN + FP}
+                        $$
+                  
+                      
+                    </p>
 					<h4>Track 2: Streaming Detection</h4>
 					<p> The real one </p>
 					</div>
