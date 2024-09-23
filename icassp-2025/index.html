@@ -12,6 +12,9 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="../assets/css/main.css" />
+        <script type="text/javascript" id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
 	</head>
 	<body class="is-preload">
 
@@ -84,7 +87,27 @@
 				<section id="problem"></section>
 					<div class="container">
 					<h3>The Problem: Call for Participation</h3>
-					<p> Wow much problem description.</p>
+					<p> New designs of smart beds are built with the ability to monitor user vitals, such as heart rate and respiration rate, and sleep characteristics, such as quality and posture. Many are familiar with how such sleep insights can be estimated from smart watches. However, smart beds are arguably a more comfortable alternative to smart watches for sleeping related insights, as they are non-contact and enable users to sleep watch-free.</p>
+                    <p> One sensor that enables estimating vitals and sleep insights in beds is an accelerometer. Accelerometers are preferrable for bed-based sleep insights as they do not capture sensitive user information such as audio and video which may otherwise turn users away from wanting to use such smart beds. When subjects lay on a smart bed with an accelerometer integrated within the mattress, the expansion and contraction of their chest from breathing induces a tilt in the mattress, which is measured by the accelerometer. It has been proven that vital signs such as heart rate and respiration rate can be extracted from accelerometers attached to a subject’s chest. Expanding on this idea, we propose that such vital signs can also be estimated based on the accelerometer recordings tracking the movements of the bed.</p>
+
+                    <p> One challenge of accelerometer-only smart beds is determining when to estimate user vitals. It is important to distinguish ambient noise arising from other vibrations of the bed from the motions arising when a user is lying on the bed. In particular, it is essential to determine if a user is lying on the bed as otherwise the inferred vitals may correspond to spurious noise signals. Additionally, the vitals produced when no one is present could cause undue concern if they are outside the normal range. Determining the presence of a person in bed is made more challenging by a variety of factors such as: 
+                         <ul>
+                            <li>Person-to-person variations</li>
+                            <li>Position-based variations in "in bed" signals</li>
+                            <li>Vibrations captured from external disturbances like people walking around</li>
+                            <li>Motion artifacts introduced by users adjusting their position in bed</li>
+                        </ul>
+                    </p>
+
+                    <p>
+                        This challenge focuses on the person detection problem. We have collected a dataset of raw accelerometer signals from an ADXL355 accelerometer, placed in between a mattress and a mattress topper. The ADXL355 is an ultra-low noise accelerometer, with a noise density of 22.5 \(\frac{\mu g}{\sqrt{Hz}}\). The dataset contains samples from a variety of users with a variety of on and off-bed disturbances. We invite participants to partake in 2 tasks:
+                        <ul>
+                            <li><b>Task 1:</b> Classification of pre-chunked accelerometer signals into the following categories: {"not in bed", "in bed"}</li>
+                            <li><b>Task 2:</b>Streaming version of a person-detection classifier which minimizes latency and maximizes accuracy.</li>
+                        </ul>
+
+
+                    </p>
 					</div>
 				</section>
 
