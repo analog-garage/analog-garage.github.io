@@ -241,7 +241,7 @@
 
                         Each transition score \( s_{switch,i} \) is computed as a combination of the prediction latency and accuracy in the window:
                         $$
-                            s_{switch,i} = \textbf{1}[s_{acc,i} > .7]\frac{s_{acc,i} + s_{latency,i}}{2}
+                            s_{switch,i} = \frac{s_{acc,i} + s_{latency,i}}{2}
                         $$
 
                          The latency score at transition \( i \) is evaluated as below. 
@@ -249,14 +249,23 @@
                             s_{latency,i} = \max(0, \frac{n_{win,i} - (\hat{t}_{switch,i} - t_{switch,i})}{n_{win,i}})
                         $$
                         In the equation above \( n_{win,i} \) is set to correspond to a 60 second window unless the number of remaining samples after \( t_{switch,i} \) is less than that. 
+                        </p>
+                        <p>
+                        Determining \( t_{switch,i} \) might be ambiguous if the submitted waveform flickers between detections during the latency window, leading to multiple position times to use. We will use the following heuristics to determine \( t_{switch,i} \):
+                            <ol>
+                                <li>At \( t_{switch,i} \), the predictions transition to the correct state</li>
+                                <li>For at least 15 seconds after \( t_{switch,i} \), the correct prediction is held </li>   
+                                <li>At least 80% of the remaining predictions in the latency window after \( t_{switch,i} \) are estimated correctly.</li>
+                            </ol>
+                        We will set \( t_{switch,i} \) to the earliest timestamp in latency window \( i \) that meets the above criteria. The reasoning for each criteria is as follows: criteria 1 ensures correct transition. Criteria 2 ensures that the transition really occured and wasn't due to a brief flicker in state. Criteria 3 ensures that the transition was meaningful/held during most of the remainder of the window. Some false positives or false negatives are allowed, but too many implies the change in state wasn't actually meanginful. If no valid \( t_{switch,i} \) is found, then \( s_{latency,i}\) is set to 0.
+                        The parameters of 15 seconds and 80% were established based on what output would feel reasonable in a real scenario with a given person detector.
+                        </p>
 
                         The accuracy score within the transition is computed as below for all predictions that fall in the transition window.
                         $$
                             s_{acc,i} = \frac{TP + TN}{TP + FP + TN + FN}
                         $$
             
-                        Note that as shown above, transition scores \( s_{switch, i} \) are set to 0 if the accuracy in that window is less than \( .7 \). This is because if the accuracy is below such a value, it is reasonable to assume the transition was not detected at all.
-
                         
                         <p>
                         The above formula is used for the predictions for each subject. It will generate a score between 0 and 1 per subject. The final score for track 2 will be the average score across all subjects:
