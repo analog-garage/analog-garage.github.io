@@ -251,13 +251,13 @@
                         In the equation above \( n_{win,i} \) is set to correspond to a 60 second window unless the number of remaining samples after \( t_{switch,i} \) is less than that. 
                         </p>
                         <p>
-                        Determining \( t_{switch,i} \) might be ambiguous if the submitted waveform flickers between detections during the latency window, leading to multiple position times to use. We will use the following heuristics to determine \( t_{switch,i} \):
+                        Determining \( \hat{t}_{switch,i} \) might be ambiguous if the submitted waveform flickers between detections during the latency window, leading to multiple position times to use. We will use the following heuristics to determine \( \hat{t}_{switch,i} \):
                             <ol>
-                                <li>At \( t_{switch,i} \), the predictions transition to the correct state</li>
-                                <li>For at least 15 seconds after \( t_{switch,i} \), the correct prediction is held </li>   
-                                <li>At least 80% of the remaining predictions in the latency window after \( t_{switch,i} \) are estimated correctly.</li>
+                                <li>At \( \hat{t}_{switch,i} \), the predictions transition to the correct state</li>
+                                <li>For at least 15 seconds after \( \hat{t}_{switch,i} \), the correct prediction is held </li>   
+                                <li>At least 80% of the remaining predictions in the latency window after \( \hat{t}_{switch,i} \) are estimated correctly.</li>
                             </ol>
-                        We will set \( t_{switch,i} \) to the earliest timestamp in latency window \( i \) that meets the above criteria. The reasoning for each criteria is as follows: criteria 1 ensures correct transition. Criteria 2 ensures that the transition really occured and wasn't due to a brief flicker in state. Criteria 3 ensures that the transition was meaningful/held during most of the remainder of the window. Some false positives or false negatives are allowed, but too many implies the change in state wasn't actually meanginful. If no valid \( t_{switch,i} \) is found, then \( s_{latency,i}\) is set to 0.
+                        We will set \( \hat{t}_{switch,i} \) to the earliest timestamp in latency window \( i \) that meets the above criteria. The reasoning for each criteria is as follows: criteria 1 ensures correct transition. Criteria 2 ensures that the transition really occured and wasn't due to a brief flicker in state. Criteria 3 ensures that the transition was meaningful/held during most of the remainder of the window. Some false positives or false negatives are allowed, but too many implies the change in state wasn't actually meanginful. If no valid \( \hat{t}_{switch,i} \) is found, then \( s_{latency,i}\) is set to 0.
                         The parameters of 15 seconds and 80% were established based on what output would feel reasonable in a real scenario with a given person detector.
                         </p>
 
