@@ -227,7 +227,7 @@
                     We have come up with an evaluation metric for this track which incorporates metrics for the following objectives: minimizing latency and maximizing accuracy. Slight emphasis is placed on the former since Track 1 handles accuracy alone. A depiction of the scoring methodology is below and explained in the subsequent paragraphs.
                     <img src="../img/track2-scoring.png" alt="" style="max-width: 100%;"/>
 
-                    First, we will explain how we compute the score \(s_j\) for an individual subject, subject \( j\).  Each waveform has a total number of transitions, denoted \( n_{switch} \), which is the number of times the subject transitions from "in bed" to "not in bed" or visa versa. For example, if a subject is in bed the entire data collection, \(n_{switch} = 0\). If the subject starts in bed, then gets out of bed and remains out of bed for the rest of the collection, \(n_{switch}=1 \). In the image below, \( n_{switch} = 2 \). The final score for a subject will be a combination of \( n_{switch} + 1 \) scores: \( s_{acc} \) which represents the accuracy score (computed outside of the latency windows only), and each \( s_{switch,i} \), which represent the score at the \(i^{th}\) transition between classes, for \(i\) in \(1, \dots, n_{switch}\):
+                    First, we will explain how we compute the score \(s_j\) for an individual subject, subject \( j\).  Each waveform has a total number of transitions, denoted \( n_{switch} \), which is the number of times the subject transitions from "in bed" to "not in bed" or visa versa. For example, if a subject is in bed the entire data collection, \(n_{switch} = 0\). If the subject starts in bed, then gets out of bed and remains out of bed for the rest of the collection, \(n_{switch}=1 \). In the image above, \( n_{switch} = 2 \). The final score for a subject will be a combination of \( n_{switch} + 1 \) scores: \( s_{acc} \) which represents the accuracy score (computed outside of the latency windows only), and each \( s_{switch,i} \), which represent the score at the \(i^{th}\) transition between classes, for \(i\) in \(1, \dots, n_{switch}\):
                         $$
                             s_j = \frac{s_{acc} + \sum_{i=1}^{n_{switch}}s_{switch,i}}{n_{switch}+1}
                         $$
@@ -246,10 +246,20 @@
 
                          The latency score at transition \( i \) is evaluated as below. 
                         $$
-                            s_{latency,i} = \max(0, \frac{n_{win,i} - (\hat{t}_{switch,i} - t_{switch,i})}{n_{win,i}})
+                            s_{latency,i} = \exp\left(-2 \left[ ln \left(1 - \frac{(\hat{t}_{switch,i} - t_{switch,i})}{n_{win,i}}\right) \right]^2 \right)
                         $$
                         In the equation above \( n_{win,i} \) is set to correspond to a 60 second window unless the number of remaining samples after \( t_{switch,i} \) is less than that. 
                         </p>
+
+						<p>
+							Let us now outline the nature of \(s_{switch,i}\) as a function of the detection delay \(\Delta t_{switch, i} = (\hat{t}_{switch,i} - t_{switch,i})\). For the purpose of exposition, consider an ideal detector that switches to the correct state at \(\hat{t}_{switch,i}\) and outputs the correct state for all other samples following the transition. Then the corresponding switch score behaves as shown in following plot.
+							<img src="../img/switch_score.png" alt="" style="max-width: 80%;"/>
+						</p>
+						
+						<p>
+							It is evident that the resultant switch score is higher for low latency detection and decreases with increasing decision delay. In particular, the switch score exceeds the accuracy score under low latency detection but is lower than that achieved by simple detection of states when the latency is higher. Thus, it is essential to ensure early detection of change points. 
+						</p>
+
                         <p>
                         Determining \( \hat{t}_{switch,i} \) might be ambiguous if the submitted waveform flickers between detections during the latency window, leading to multiple position times to use. We will use the following heuristics to determine \( \hat{t}_{switch,i} \):
                             <ol>
